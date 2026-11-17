@@ -1,2 +1,7 @@
 node_modules/
 out/
+config.env
+state.json
+dumps/
+bot.log
+__pycache__/
