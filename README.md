@@ -11,7 +11,7 @@ The rotating link and the 20‑minute timeout don't matter. Every check starts a
 ## Setup (about 15 minutes, once)
 
 **On the tablet**
-1. Install the **ntfy** app (Play Store / App Store). This is where alerts arrive.
+1. Optional: install the **ntfy** app if you want push alerts. The bot books without it.
 
 **On the spare Android phone** (on home Wi‑Fi, plugged into a charger)
 1. Install **Termux** and **Termux:Boot** from **F‑Droid** (https://f-droid.org). The Play Store versions are outdated.

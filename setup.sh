@@ -24,7 +24,9 @@ if [ ! -f config.env ]; then
   read -r -p "Last name: " LN </dev/tty
   read -r -p "Email: " EM </dev/tty
   read -r -p "Phone (optional, Enter to skip): " PH </dev/tty
-  TOPIC="lra-rt-$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n' | head -c 20)"
+  read -r -p "Push notifications via the ntfy app? (y/N): " WANT </dev/tty
+  TOPIC=""
+  case "$WANT" in y|Y|j|J) TOPIC="lra-rt-$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n' | head -c 20)";; esac
   cat > config.env <<CFG
 FIRST_NAME=$FN
 LAST_NAME=$LN
@@ -46,11 +48,13 @@ cd "$DIR" && nohup ./run.sh > bot.log 2>&1 &
 BOOT
 chmod +x "$HOME/.termux/boot/start-appointment-bot" run.sh
 
-echo
-echo "================================================================"
-echo " Notifications topic:  $TOPIC"
-echo " In the ntfy app (on your tablet), tap + and subscribe to it."
-echo "================================================================"
+if [ -n "$TOPIC" ]; then
+  echo
+  echo "================================================================"
+  echo " Notifications topic:  $TOPIC"
+  echo " In the ntfy app, tap + and subscribe to it."
+  echo "================================================================"
+fi
 echo
 echo "== Test run (does NOT book anything)..."
 python bot.py discover | tail -n 40 || true
