@@ -1,0 +1,21 @@
+name: probe
+on:
+  push:
+    paths: ['scripts/probe.js', '.github/workflows/probe.yml']
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: curl -s https://ipinfo.io/json || true
+      - run: node scripts/probe.js
+        env:
+          BOOKING_URL: "https://lra-reutlingen.saas.smartcjm.com/m/bsc/extern/calendar/?uid=b7bab144-58a7-4044-ad6f-505e604f6401&wsid=b5d05325-6182-4a59-bf6c-2029eb50a626&lang=de"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: probe-out, path: out/ }
