@@ -43,6 +43,7 @@ The rotating link and the 20‑minute timeout don't matter. Every check starts a
 | `SERVICE_INDEX` | which service on the first page (default `3`) |
 | `SERVICE_NAME` | instead of the index, part of the service name, e.g. `Neuzulassung` |
 | `NOT_BEFORE` / `NOT_AFTER` | only accept slots in this date range (`YYYY-MM-DD`) |
+| `TIME_FROM` / `TIME_TO` | only accept slots starting in this time window (`HH:MM`, inclusive) |
 | `AUTO_BOOK` | `1` = book automatically, `0` = alert only |
 | `POLL_SECONDS` | time between checks (please don't go much below 60) |
 

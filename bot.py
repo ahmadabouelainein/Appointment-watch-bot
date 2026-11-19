@@ -51,6 +51,8 @@ def load_config():
         "AUTO_BOOK": "1",
         "NOT_BEFORE": "",            # optional YYYY-MM-DD: ignore slots earlier than this
         "NOT_AFTER": "",             # optional YYYY-MM-DD: ignore slots later than this
+        "TIME_FROM": "",             # optional HH:MM: ignore slots starting earlier
+        "TIME_TO": "",               # optional HH:MM: ignore slots starting later
         "POLL_SECONDS": "75",
         "NTFY_TOPIC": "",
         "NTFY_SERVER": "https://ntfy.sh",
@@ -510,19 +512,37 @@ def context_text(el):
     return f"{date} {own}".strip()[:200]
 
 
+def hhmm(s):
+    h, m = re.split(r"[:.]", s.strip())[:2]
+    return f"{int(h):02d}:{int(m):02d}"
+
+
 def filter_dates(slots):
+    """Keep only slots inside NOT_BEFORE..NOT_AFTER (dates) and TIME_FROM..TIME_TO
+    (time of day, inclusive). When a filter is set, a slot whose date/time can't be
+    read is skipped rather than risk booking the wrong one."""
     lo, hi = CFG["NOT_BEFORE"], CFG["NOT_AFTER"]
-    if not (lo or hi):
+    tlo = hhmm(CFG["TIME_FROM"]) if CFG["TIME_FROM"] else ""
+    thi = hhmm(CFG["TIME_TO"]) if CFG["TIME_TO"] else ""
+    if not (lo or hi or tlo or thi):
         return slots
     keep = []
     for s in slots:
-        m = DATE_RE.search(s["text"])
-        if not m:
-            keep.append(s)
-            continue
-        iso = f"{m.group(3)}-{int(m.group(2)):02d}-{int(m.group(1)):02d}"
-        if (not lo or iso >= lo) and (not hi or iso <= hi):
-            keep.append(s)
+        if lo or hi:
+            m = DATE_RE.search(s["text"])
+            if not m:
+                continue
+            iso = f"{m.group(3)}-{int(m.group(2)):02d}-{int(m.group(1)):02d}"
+            if (lo and iso < lo) or (hi and iso > hi):
+                continue
+        if tlo or thi:
+            m = SLOT_TIME.search(DATE_RE.sub(" ", s["text"]))
+            if not m:
+                continue
+            t = hhmm(m.group(0))
+            if (tlo and t < tlo) or (thi and t > thi):
+                continue
+        keep.append(s)
     return keep
 
 
